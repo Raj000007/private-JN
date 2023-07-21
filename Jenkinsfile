@@ -15,6 +15,9 @@ pipeline {
   NEXUSPORT = '8081'
   NEXUS_GRP_REPO = 'group'
         NEXUS_LOGIN = 'nexuslogin'
+                SONARSERVER = 'sonarserver'
+        SONARSCANNER = 'sonarscanner'
+
     }
 
     stages {
@@ -42,5 +45,23 @@ pipeline {
                 sh 'mvn -s settings.xml checkstyle:checkstyle'
             }
         }
+                stage('Sonar Analysis') {
+            environment {
+                scannerHome = tool "${SONARSCANNER}"
+            }
+            steps {
+               withSonarQubeEnv("${SONARSERVER}") {
+                   sh '''${scannerHome}/bin/sonar-scanner -Dsonar.projectKey=JNS \
+                   -Dsonar.host.url=http://54.163.221.115:9000 \
+                   -Dsonar.login=e7fd8579bf9a00f7e7e51e376a727fe90341139c
+                   -Dsonar.projectName=JNS \
+                   -Dsonar.projectVersion=1.0 \
+                   -Dsonar.sources=src/ \
+                   -Dsonar.java.binaries=target/test-classes/com/visualpathit/account/controllerTest/ \
+                   -Dsonar.junit.reportsPath=target/surefire-reports/ \
+                   -Dsonar.java.checkstyle.reportPaths=target/checkstyle-result.xml'''
+              }
+            }
+        
     }
 }
